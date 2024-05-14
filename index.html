@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>问卷网站</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>问卷调查</h1>
+    <div class="container">
+        <form id="survey">
+            <div class="if_online">
+                <label class="zi">1. 您有Minecraft Java版的正版账号吗？</label><br>
+                <input type="radio" class="yes" name="online" value="0" onclick="yesswitch()"> 有<br>
+                <input type="radio" class="no" name="online" value="1" onclick="noswitch()"> 没有<br>
+                <input type="radio" class="bedrock" name="online" value="2" onclick="bedrockswitch()"> 我用的基岩国际版（非手机网易版）<br>
+            </div>
+
+            <div id="online_username">
+                <label for="username" class="zi">2. 您的正版账号用户名是？（请正确填写，区分大小写）</label><br>
+                <input type="text" id="username" name="e" onclick="">
+            </div>
+            <div id="not_online_username">
+                <label for="username" class="zi">2. 您的离线版账号用户名是？（请正确填写，区分大小写）请注意，游玩过程中最好不要改名，否则需要重新添加白名单</label><br>
+                <input type="text" id="username" name="e">
+            </div>
+            <div id="bedrock_username">
+                <label for="username" class="zi">2. 您的基岩版用户名是？（请正确填写，区分大小写）（注意，如果有空格，把空格换成下划线！！！）</label><br>
+                <input type="text" id="username" name="e">
+            </div>
+            <span id="usernameSpan" color="red"></span>
+            <input type="submit" value="提交">
+        </form>
+    </div>
+    <script>
+        function yesswitch(){
+            document.getElementById('online_username').style.display="block";
+            document.getElementById('not_online_username').style.display="none";
+            document.getElementById('bedrock_username').style.display="none";
+        }
+        function noswitch(){
+            document.getElementById('online_username').style.display="none";
+            document.getElementById('not_online_username').style.display="block";
+            document.getElementById('bedrock_username').style.display="none";
+        }
+        function bedrockswitch(){
+            document.getElementById('online_username').style.display="none";
+            document.getElementById('not_online_username').style.display="none";
+            document.getElementById('bedrock_username').style.display="block";
+        }
+    </script>
+    <script>
+        document.getElementById('survey').addEventListener('submit', function(e) {
+            e.preventDefault();//阻止默认
+            var usernameText = document.getElementById("username").value;
+            var patt = /^\w{3,16}$/;//regex
+            var usernameSpanObj = document.getElementById("usernameSpan");
+            if(patt.test(usernameText)) {
+                //document.getElementById("usernameSpan").innerHTML="用户名验证通过！";
+                var data = new FormData(e.target);
+                var output = {};
+                for (const entry of data) {
+                    if(entry[1] != ''){
+                        output[entry[0]] = entry[1];
+                    }
+                }
+                fetch('http://localhost:15146', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(output)
+                }).then(response => response.text())
+                .then(data => document.getElementById("usernameSpan").innerHTML = data)//往body里添加回传
+                .catch((error) => {
+                console.error('Error:', error);
+                });
+            } else {
+                document.getElementById("usernameSpan").innerHTML="用户名验证不通过！用户名只能由英文字母和下划线组成，且位数在3-16之间！";
+            }
+        });
+    </script>
+    
+</body>
+</html>
